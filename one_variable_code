@@ -1,0 +1,71 @@
+/*
+ * Code to implement linear regression algorithm for one feature only*/
+
+import java.io.File;
+import net.sf.javaml.core.Dataset;
+import net.sf.javaml.tools.data.FileHandler;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import static cern.colt.matrix.doublealgo.Transform.pow;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+public class mainml 
+{
+    public static void main(String[] args) throws Exception 
+    {
+        Dataset data = FileHandler.loadDataset(new File("C:\\Users\\500040145\\Documents\\NetBeansProjects\\minor_project\\UCI-small\\housing\\housing.data"), ",");
+        System.out.println(data);
+    }
+}
+class compute_cost
+{
+    public double cost(DoubleMatrix2D X,DoubleMatrix1D y,DoubleMatrix1D theta )
+    {
+       double j=0; //cost to be calculated
+       Algebra algebra     = new Algebra();
+       double z = 2 * (double)X.rows(); //2*m where m = size of dataset
+       double m = 1/z;
+       //hypothesis = X*theta
+       DoubleMatrix1D hypothesies = algebra.mult( X, theta );
+       //h = h-y
+       hypothesies.assign(y,Functions.minus);
+       hypothesies = pow( hypothesies,2 );
+       return j;
+    }
+}
+class grad_descent extends compute_cost //Gradient descent Class
+{
+    //Gradient Descent function
+    public void descent(DoubleMatrix1D theta,
+                            DoubleMatrix2D X,
+                            DoubleMatrix1D y ) 
+  {
+    int iter = 1500;
+    double alpha = 0.01;
+    double tcost = 0;
+    double j[] = new double[iter];
+    Algebra algebra     = new Algebra();
+    for(int i = 0; i<iter; i++)
+    {
+    // ALPHA*(1/m).
+    double  mod    = alpha / (double)X.rows(); //m
+    //hypothesis = X*theta
+    DoubleMatrix1D hypothesies = algebra.mult( X, theta );  
+    //hypothesis - y  
+    hypothesies.assign(y,Functions.minus);
+    //Transpose X
+    DoubleMatrix2D transposed = algebra.transpose(X);
+    //X_Transpose*hypothesis
+    DoubleMatrix1D delta     = algebra.mult(transposed, hypothesies );
+    // Scale the deltas by 1/m and learning rate alhpa.  (alpha/m)
+    delta.assign(Functions.mult(mod));
+    //Theta = Theta - Delta
+    theta.assign( delta, Functions.minus );
+    //cost
+    tcost = cost(X,y,theta);
+    //storing cost
+    j[i] = tcost;
+    }
+}
+    
+}
